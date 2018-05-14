@@ -1,0 +1,178 @@
+*:focus {
+  outline:none;
+}
+
+html, body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  margin: 0;
+  min-height: 180px;
+  padding: 0;
+  width: 384px;
+  background-color: rgb(57,48,90);
+}
+
+h1 {
+  font-family: 'Menlo', monospace;
+  font-size: 22px;
+  font-weight: 400;
+  margin: 0;
+  color: #6441A4;
+}
+
+a:link, a:visited {
+  color: lightgray;
+  outline: 0;
+  text-decoration: none;  
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  width: 30px;
+}
+
+input {
+  margin-left: 5px;
+  height: 20px;
+  background-color: rgb(14,12,19);;
+  color: white;
+  border-color: black;
+}
+
+li {
+  width: 90%;
+  list-style-type: none;
+  padding-left: 20px;
+  background-color: rgb(32,29,43);
+}
+
+li:first-child {
+  padding-top: 10px;
+}
+
+li:last-child {
+  padding-bottom: 10px;
+  margin-bottom: -15px;  
+}
+
+.add-icon, .add-channel-text, footer .close-icon {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.add-channel-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.modal-header {
+  background-color: rgb(57,48,90);
+  align-items: center;
+  border-bottom: 0.5px solid rgb(44,38,64);
+}
+
+.modal-content {
+  font-size: 15px;
+  background-color: rgb(23,20,31);
+  color: rgb(137,131,148);
+  padding-top: 0.5px;
+  padding-bottom: 1px;
+  margin-left: -25px;
+}
+
+.online {
+  color: #b19ed6;
+  padding-bottom: 5px;
+}
+
+.offline {
+  margin-top: 20px;
+  padding-bottom: 15px;
+}
+
+.channel-name {
+  color: rgb(169,151,205);
+}
+
+.channel-game {
+  color: rgb(169,151,205);
+}
+
+.hide-item {
+  display: none;
+}
+
+.online .remove-icon {
+  float: right;
+  margin-right: 13px;
+  margin-top: 2px;
+  display: none;
+}
+.offline .remove-icon {
+  float: right;
+  margin-right: 13px;
+  margin-top: -18px;
+  display: none;
+}
+
+.logo {
+  color: #b19ed6;
+  padding: 16px;
+}
+
+.logo-icon {
+  vertical-align: text-bottom;
+  margin-right: 20px;
+  margin-left: 10px;
+}
+
+.version {
+  color: #b19ed6;
+  font-size: 18px;
+}
+
+.footer {
+  width: 100%;
+  color: white;
+  background-color: rgb(57,48,90);
+  padding-top: 10px;
+  padding-bottom: 1px;
+  padding-left: 22px;
+}
+
+.rotate-to-close {
+  transform: rotate(45deg);
+  transition: transform 1s linear;
+}
+
+.remove-channels-btn {
+  float: right;
+  font-size: 13px;
+  margin-right: 38px;
+  margin-bottom: 12px;  
+  border: none;
+  background: #6441a4;
+  color: #fff;
+  height: 30px;
+  font-weight: 600;
+}
+
+.done-btn {
+  background: #fff;
+  color: #6441a4;
+  width: 64.2344px;
+  font-weight: 600;
+  border: 2px solid #6441a4;
+}
+
+.remove-channels-btn:hover {
+  background-color: rgb(124,94,188);
+}
+
+.done-btn:hover {
+  background-color: #fff;
+}
