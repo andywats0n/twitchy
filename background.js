@@ -199,6 +199,7 @@ function updateChannelUrls() {
 }
 
 // fetch single channel and determine if online or offline
+// TODO: handle response errors
 function fetchNewChannel(name) {
   let newChannelUrl = url + name;
   fetch(newChannelUrl, { headers: {"Client-ID": clientId }})
@@ -207,6 +208,7 @@ function fetchNewChannel(name) {
 }
 
 // fetch channel data and determine if online or offline
+// TODO: handle response errors
 function fetchChannels() {
   channelUrls.forEach(channel => {
     fetch(channel, { headers: { "Client-ID": clientId }})
@@ -227,7 +229,7 @@ function loadDataIntoStorage() {
   chrome.storage.local.set({"channelList": localChannelList});
 }
 
-// TODO: Maybe get game cover pics from here
+// TODO: gold-plating: maybe get game cover pics and organize app by game
 function fetchGameData() {
   let gameDataUrl = 'https://api-endpoint.igdb.com';
   fetch(gameDataUrl, { headers: { "user-key": "7af87312b398b3ea1c3f0db3770d5c66" }})
