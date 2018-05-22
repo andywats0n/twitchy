@@ -1,9 +1,15 @@
 let url = 'https://api.twitch.tv/kraken/streams/';
 let clientId = 'f8alhi36gd25fhrvoxsn2cn30sdrky';
 
+let channel;
+let channelList;
+let channelListItem;
+let removeChannelIcons;
+let removeIconContainer;
+let channelListItemContainer;
+
 let channelUrls = [];
 let localChannelList = [];
-
 let isDoneBtn = false;
 let shouldShowAddChannelInput = false;
 
@@ -15,15 +21,6 @@ let closeAddChannelInputIcon = document.querySelector('.close-icon');
 let onlineList = document.querySelector('.online');
 let offlineList = document.querySelector('.offline');
 let removeBtn = document.querySelector('.remove-channels-btn');
-
-let channel;
-let channelListItem;
-let removeChannelIcon;
-let removeIconContainer;
-let channelListItemContainer;
-
-// run this to remove all items from storage
-// chrome.storage.local.set({"channelList": localChannelList});
 
 // load channels from local storage
 chrome.storage.local.get("channelList", loadChannels);
@@ -38,13 +35,49 @@ addChannelInput.addEventListener('keydown', addChannelToList);
 // when 'x' is clicked, hide input box
 closeAddChannelInputIcon.addEventListener('click', shouldShowInput);
 // when 'remove' is clicked, append x's to channel for removing
-removeBtn.addEventListener('click', function() {
+removeBtn.addEventListener('click', function(e) {
+  removeChannelIcons = document.querySelectorAll('.remove-icon');
+  removeChannelIcons.forEach(icon => {
+    icon.addEventListener('click', removeChannelFromList);
+  });
+
   channelList = document.querySelectorAll('.channel');
   switchRemoveDone(channelList);
 });
 
-// query channel list items and display 'x' icon
-function addChannelIcon(channelList) {
+function getChannelNameIndex(channelName) {
+  return localChannelList.indexOf(channelName.toLowerCase());
+}
+
+// remove single channel from the list
+function removeChannelFromList(e) {
+  let childArray = Array.from(e.target.parentElement.childNodes);
+  if(childArray[1].classList.contains('channel')) {
+    let channelName = childArray[1].firstChild.nextSibling.innerHTML;
+    if(localChannelList.includes(channelName.toLowerCase())) {
+      localChannelList.splice(localChannelList.indexOf(channelName.toLowerCase()), 1);
+      e.target.parentElement.remove();
+      loadDataIntoStorage();
+    }
+  }
+}
+
+// when 'remove' is clicked, switch to 'done' and show 'x' icons
+// when 'done' is clicked, switch to 'remove' and hide 'x' icons
+function switchRemoveDone(channelList) {
+  if(!isDoneBtn) {
+    removeToDone(channelList);
+  } else if(isDoneBtn) {
+    doneToRemove(channelList);
+  }
+}
+
+// 'remove' -> 'done'; display 'x' icons in li
+function removeToDone() {
+  isDoneBtn = !isDoneBtn;
+  removeBtn.innerHTML = 'Done';
+  removeBtn.classList.add('done-btn');
+
   channelList.forEach(channel => {
     removeIcon = document.querySelectorAll('.remove-icon');
     removeIcon.forEach(icon => {
@@ -53,57 +86,18 @@ function addChannelIcon(channelList) {
   });
 }
 
-// query channel list and hide 'x' icon
-function hideChannelIcon(channelList) {
+// 'done' -> 'remove'; hide 'x' icons in li
+function doneToRemove() {
+  isDoneBtn = !isDoneBtn;
+  removeBtn.innerHTML = 'Remove';
+  removeBtn.classList.remove('done-btn');
+
   channelList.forEach(channel => {
     removeIcon = document.querySelectorAll('.remove-icon');
     removeIcon.forEach(icon => {
       icon.style.display = 'none';
     });
   });
-}
-
-// remove single channel from the list
-function removeChannelFromList() {
-  channelList = document.querySelectorAll('li');
-  removeChannelIcon = document.querySelectorAll('.remove-icon');
-  
-  removeChannelIcon.forEach(icon => {
-    icon.addEventListener('click', function() {
-      channelList.forEach((item, index) => {
-        // let removeMe = removeChannelIcon.indexOf(index);
-        // console.log(removeMe);
-        // item.classList.add('hide-item');
-      });
-    });
-  });
-}
-
-// when 'remove' is clicked, switch to 'done' and show 'x' icons
-// when 'done' is clicked, switch to 'remove' and hide 'x' icons
-function switchRemoveDone(channelList) {
-  if(!isDoneBtn) {
-    addChannelIcon(channelList);
-    removeChannelFromList(channelList); // this should go somewhere else...
-    removeToDone();
-  } else if(isDoneBtn) {
-    hideChannelIcon(channelList);
-    doneToRemove();
-  }
-}
-
-// doesn't need to be a separate function
-function removeToDone() {
-  isDoneBtn = !isDoneBtn;
-  removeBtn.innerHTML = 'Done';
-  removeBtn.classList.add('done-btn');
-}
-
-// doesn't need to be a separate function
-function doneToRemove() {
-  isDoneBtn = !isDoneBtn;
-  removeBtn.innerHTML = 'Remove';
-  removeBtn.classList.remove('done-btn');
 }
 
 // should the add channel input box be shown or hidden
@@ -144,7 +138,7 @@ function addChannelToList(e) {
     hideChannelInput();
     // TODO: give user feedback if channel is already in the list
     if(!localChannelList.includes(channelName)) {
-      localChannelList.push(channelName);
+      localChannelList.push(channelName.toLowerCase());
       fetchNewChannel(channelName);
       loadDataIntoStorage();
     }
@@ -153,14 +147,14 @@ function addChannelToList(e) {
   }
 }
 
-// what every list item will look like
+// list item template
 function generateChannelListItem() {
-  channelListItemContainer = document.createElement('span');
+  // channelListItemContainer = document.createElement('span');
   channelListItem = document.createElement('li');
   channelListItem.classList.add('channel-list-item');
 
   // add 'x' icon to each list item
-  removeChannelIcon = document.createElement('div');
+  removeChannelIcon = document.createElement('a');
   removeChannelIcon.classList.add('remove-icon', 'fa', 'fa-close');
 }
 
@@ -171,13 +165,13 @@ function channelOnline(data) {
   // 'pubg' is easier to read
   if((data.stream.game).toUpperCase() === 'PLAYERUNKNOWN\'S BATTLEGROUNDS') data.stream.game = 'pubg';
   
-  onlineList.appendChild(channelListItemContainer);
-  channelListItemContainer.appendChild(channelListItem);
   channelListItem.innerHTML = `
-  <a href="${data.stream.channel.url}" target="_blank">
-    <strong class="channel-name">${data.stream.channel.display_name}</strong> playing 
-    <strong class="channel-game channel">${data.stream.game}</strong>
-  </a>`;
+    <a href="${data.stream.channel.url}" target="_blank" class="channel">
+      <strong class="channel channel-name">${data.stream.channel.display_name}</strong> playing 
+      <strong class="channel-game channel">${data.stream.game}</strong>
+    </a>`;
+
+  onlineList.appendChild(channelListItem);
   channelListItem.appendChild(removeChannelIcon);
 }
 
@@ -188,14 +182,13 @@ function channelOffline(data) {
   // dump channel url data to leave only channel name
   let channelName = data._links.self.replace(url, '');
 
-  offlineList.appendChild(channelListItemContainer);
-  channelListItemContainer.appendChild(channelListItem);
   channelListItem.innerHTML = `
     <div class="channel offline-channel">
-      <strong>${channelName}</strong> is offline
+      <strong class="channel-name">${channelName}</strong> is offline
     </div>`;
+
+  offlineList.appendChild(channelListItem);
   channelListItem.appendChild(removeChannelIcon);
-  removeChannelIcon.style.display = '15px';
 }
 
 // concat urls with channel names to be fetched
