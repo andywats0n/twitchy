@@ -1,33 +1,28 @@
-let url = 'https://api.twitch.tv/kraken/streams/';
-let clientId = 'f8alhi36gd25fhrvoxsn2cn30sdrky';
+const url = 'https://api.twitch.tv/kraken/streams/';
+const clientId = 'f8alhi36gd25fhrvoxsn2cn30sdrky';
+
+const addChannelInput = document.createElement('input');
+const inputContainer = document.querySelector('.input-container');
+const addChannelInputIcon = document.querySelector('.add-icon');
+const closeAddChannelInputIcon = document.querySelector('.close-icon');
+const onlineList = document.querySelector('.online');
+const offlineList = document.querySelector('.offline');
+const removeBtn = document.querySelector('.remove-channels-btn');
 
 let channel;
 let channelList;
 let channelListItem;
 let removeChannelIcons;
-let removeIconContainer;
-let channelListItemContainer;
 
 let channelUrls = [];
 let localChannelList = [];
-let isDoneBtn = false;
+let isEditingChannelList = false;
 let shouldShowAddChannelInput = false;
-
-let footer = document.querySelector('.footer');
-let addChannelInput = document.createElement('input');
-let inputContainer = document.querySelector('.input-container');
-let addChannelInputIcon = document.querySelector('.add-icon');
-let closeAddChannelInputIcon = document.querySelector('.close-icon');
-let onlineList = document.querySelector('.online');
-let offlineList = document.querySelector('.offline');
-let removeBtn = document.querySelector('.remove-channels-btn');
 
 // load channels from local storage
 chrome.storage.local.get("channelList", loadChannels);
-
 // hide input box 'x' icon on load
 closeAddChannelInputIcon.style.display = 'none';
-
 // when 'plus' icon is clicked, show input box
 addChannelInputIcon.addEventListener('click', shouldShowInput);
 // on key down, add channel to the list
@@ -35,46 +30,43 @@ addChannelInput.addEventListener('keydown', addChannelToList);
 // when 'x' is clicked, hide input box
 closeAddChannelInputIcon.addEventListener('click', shouldShowInput);
 // when 'remove' is clicked, append x's to channel for removing
-removeBtn.addEventListener('click', function(e) {
+removeBtn.addEventListener('click', showRemoveChannelIcons);
+
+// loads event listener to show remove icons from list
+function showRemoveChannelIcons(e) {
   removeChannelIcons = document.querySelectorAll('.remove-icon');
-  removeChannelIcons.forEach(icon => {
-    icon.addEventListener('click', removeChannelFromList);
-  });
-
+  removeChannelIcons.forEach(icon => icon.addEventListener('click', removeChannelFromList));
   channelList = document.querySelectorAll('.channel');
-  switchRemoveDone(channelList);
-});
-
-function getChannelNameIndex(channelName) {
-  return localChannelList.indexOf(channelName.toLowerCase());
+  canEditChannelList(channelList);
 }
 
 // remove single channel from the list
 function removeChannelFromList(e) {
+  let channelListItem = e.target.parentElement;
   let childArray = Array.from(e.target.parentElement.childNodes);
+  let channelName = (childArray[1].firstChild.nextSibling.innerHTML).toLowerCase();
+
   if(childArray[1].classList.contains('channel')) {
-    let channelName = childArray[1].firstChild.nextSibling.innerHTML;
-    if(localChannelList.includes(channelName.toLowerCase())) {
-      localChannelList.splice(localChannelList.indexOf(channelName.toLowerCase()), 1);
-      e.target.parentElement.remove();
-      loadDataIntoStorage();
+    if(localChannelList.includes(channelName)) {
+      localChannelList.splice(localChannelList.indexOf(channelName), 1);
+      channelListItem.remove();
     }
   }
 }
 
 // when 'remove' is clicked, switch to 'done' and show 'x' icons
 // when 'done' is clicked, switch to 'remove' and hide 'x' icons
-function switchRemoveDone(channelList) {
-  if(!isDoneBtn) {
-    removeToDone(channelList);
-  } else if(isDoneBtn) {
-    doneToRemove(channelList);
+function canEditChannelList(channelList) {
+  if(!isEditingChannelList) {
+    editChannelList(channelList);
+  } else if(isEditingChannelList) {
+    doneEditChannelList(channelList);
   }
 }
 
 // 'remove' -> 'done'; display 'x' icons in li
-function removeToDone() {
-  isDoneBtn = !isDoneBtn;
+function editChannelList(channelList) {
+  isEditingChannelList = !isEditingChannelList;
   removeBtn.innerHTML = 'Done';
   removeBtn.classList.add('done-btn');
 
@@ -86,9 +78,9 @@ function removeToDone() {
   });
 }
 
-// 'done' -> 'remove'; hide 'x' icons in li
-function doneToRemove() {
-  isDoneBtn = !isDoneBtn;
+// 'done' -> 'remove'; hide 'x' icons in li; set local storage
+function doneEditChannelList(channelList) {
+  isEditingChannelList = !isEditingChannelList;
   removeBtn.innerHTML = 'Remove';
   removeBtn.classList.remove('done-btn');
 
@@ -98,6 +90,8 @@ function doneToRemove() {
       icon.style.display = 'none';
     });
   });
+
+  setLocalStorage();
 }
 
 // should the add channel input box be shown or hidden
@@ -140,20 +134,18 @@ function addChannelToList(e) {
     if(!localChannelList.includes(channelName)) {
       localChannelList.push(channelName.toLowerCase());
       fetchNewChannel(channelName);
-      loadDataIntoStorage();
+      setLocalStorage();
     }
   } else if(e.keyCode === 27) {
     hideChannelInput();
   }
 }
 
-// list item template
+// list item template: <li class="channel-list-item"><a class="remove-icon fa fa-close">[ChannelName]</a></li>
 function generateChannelListItem() {
-  // channelListItemContainer = document.createElement('span');
   channelListItem = document.createElement('li');
   channelListItem.classList.add('channel-list-item');
 
-  // add 'x' icon to each list item
   removeChannelIcon = document.createElement('a');
   removeChannelIcon.classList.add('remove-icon', 'fa', 'fa-close');
 }
@@ -162,13 +154,16 @@ function generateChannelListItem() {
 function channelOnline(data) {
   generateChannelListItem();
 
+  // TODO: refactoring into less functions here possible
+  // data.stream !== null ? channelOnline(data) : channelOffline(data);
+
   // 'pubg' is easier to read
   if((data.stream.game).toUpperCase() === 'PLAYERUNKNOWN\'S BATTLEGROUNDS') data.stream.game = 'pubg';
   
   channelListItem.innerHTML = `
     <a href="${data.stream.channel.url}" target="_blank" class="channel">
       <strong class="channel channel-name">${data.stream.channel.display_name}</strong> playing 
-      <strong class="channel-game channel">${data.stream.game}</strong>
+      <strong class="channel channel-game">${data.stream.game}</strong>
     </a>`;
 
   onlineList.appendChild(channelListItem);
@@ -225,7 +220,7 @@ function loadChannels(result) {
 }
 
 // set local storage to array of channel names
-function loadDataIntoStorage() {
+function setLocalStorage() {
   chrome.storage.local.set({"channelList": localChannelList});
 }
 
