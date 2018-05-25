@@ -1,23 +1,23 @@
+const closeAddChannelInputIcon = document.querySelector('.close-icon');
+const inputContainer = document.querySelector('.input-container');
+const removeBtn = document.querySelector('.remove-channels-btn');
+const addChannelInputIcon = document.querySelector('.add-icon');
+const addChannelInput = document.createElement('input');
+const offlineList = document.querySelector('.offline');
+const onlineList = document.querySelector('.online');
+
 const url = 'https://api.twitch.tv/kraken/streams/';
 const clientId = 'f8alhi36gd25fhrvoxsn2cn30sdrky';
 
-const addChannelInput = document.createElement('input');
-const inputContainer = document.querySelector('.input-container');
-const addChannelInputIcon = document.querySelector('.add-icon');
-const closeAddChannelInputIcon = document.querySelector('.close-icon');
-const onlineList = document.querySelector('.online');
-const offlineList = document.querySelector('.offline');
-const removeBtn = document.querySelector('.remove-channels-btn');
-
-let channel;
-let channelList;
-let channelListItem;
-let removeChannelIcons;
-
-let channelUrls = [];
-let localChannelList = [];
-let isEditingChannelList = false;
 let shouldShowAddChannelInput = false;
+let isEditingChannelList = false;
+let localChannelList = [];
+let channelUrls = [];
+
+let removeChannelIcons;
+let channelListItem;
+let channelList;
+let channel;
 
 // load channels from local storage
 chrome.storage.local.get("channelList", loadChannels);
@@ -46,11 +46,9 @@ function removeChannelFromList(e) {
   let childArray = Array.from(e.target.parentElement.childNodes);
   let channelName = (childArray[1].firstChild.nextSibling.innerHTML).toLowerCase();
 
-  if(childArray[1].classList.contains('channel')) {
-    if(localChannelList.includes(channelName)) {
-      localChannelList.splice(localChannelList.indexOf(channelName), 1);
-      channelListItem.remove();
-    }
+  if(childArray[1].classList.contains('channel') && localChannelList.includes(channelName)) {
+    localChannelList.splice(localChannelList.indexOf(channelName), 1);
+    channelListItem.remove();
   }
 }
 
@@ -111,7 +109,7 @@ function showChannelInput() {
   inputContainer.appendChild(addChannelInput);
   inputContainer.style.borderColor = 'purple';
   addChannelInput.focus();
-  addChannelInput.style.width = '50%'; 
+  addChannelInput.style.width = '33%'; 
   addChannelInput.style.fontSize = '14px';
   addChannelInput.setAttribute('placeholder', 'Search');
 }
@@ -141,49 +139,34 @@ function addChannelToList(e) {
   }
 }
 
-// list item template: <li class="channel-list-item"><a class="remove-icon fa fa-close">[ChannelName]</a></li>
-function generateChannelListItem() {
+function addChannel(data) {
   channelListItem = document.createElement('li');
-  channelListItem.classList.add('channel-list-item');
-
   removeChannelIcon = document.createElement('a');
+  channelListItem.classList.add('channel-list-item');
   removeChannelIcon.classList.add('remove-icon', 'fa', 'fa-close');
-}
 
-// add online channels to online list
-function channelOnline(data) {
-  generateChannelListItem();
+  console.log('online:', onlineList.childNodes.length);
+  console.log('offline:', offlineList.childNodes.length);
 
-  // TODO: refactoring into less functions here possible
-  // data.stream !== null ? channelOnline(data) : channelOffline(data);
-
-  // 'pubg' is easier to read
-  if((data.stream.game).toUpperCase() === 'PLAYERUNKNOWN\'S BATTLEGROUNDS') data.stream.game = 'pubg';
-  
-  channelListItem.innerHTML = `
-    <a href="${data.stream.channel.url}" target="_blank" class="channel">
-      <strong class="channel channel-name">${data.stream.channel.display_name}</strong> playing 
-      <strong class="channel channel-game">${data.stream.game}</strong>
-    </a>`;
-
-  onlineList.appendChild(channelListItem);
-  channelListItem.appendChild(removeChannelIcon);
-}
-
-// add offline channel to offline list
-function channelOffline(data) {
-  generateChannelListItem();
-  
-  // dump channel url data to leave only channel name
-  let channelName = data._links.self.replace(url, '');
-
-  channelListItem.innerHTML = `
-    <div class="channel offline-channel">
-      <strong class="channel-name">${channelName}</strong> is offline
-    </div>`;
-
-  offlineList.appendChild(channelListItem);
-  channelListItem.appendChild(removeChannelIcon);
+  // if stream is not null, add to online list, otherwise add to offline list
+  if(data.stream !== null && onlineList.childNodes.length > 1) {
+    if((data.stream.game).toUpperCase() === 'PLAYERUNKNOWN\'S BATTLEGROUNDS') data.stream.game = 'pubg';
+    channelListItem.innerHTML = `
+      <a href="${data.stream.channel.url}" target="_blank" class="channel">
+        <strong class="channel channel-name">${data.stream.channel.display_name}</strong> playing 
+        <strong class="channel channel-game">${data.stream.game}</strong>
+      </a>`;
+    onlineList.appendChild(channelListItem);
+    channelListItem.appendChild(removeChannelIcon);
+  } else {
+    let channelName = data._links.self.replace(url, '');
+    channelListItem.innerHTML = `
+      <div class="channel offline-channel">
+        <strong class="channel-name">${channelName}</strong> is offline
+      </div>`;
+    offlineList.appendChild(channelListItem);
+    channelListItem.appendChild(removeChannelIcon);
+  }
 }
 
 // concat urls with channel names to be fetched
@@ -199,7 +182,7 @@ function fetchNewChannel(name) {
   let newChannelUrl = url + name;
   fetch(newChannelUrl, { headers: {"Client-ID": clientId }})
   .then(response => response.json())
-  .then(data => { data.stream !== null ? channelOnline(data) : channelOffline(data) })
+  .then(data => addChannel(data));
 }
 
 // fetch channel data and determine if online or offline
@@ -208,7 +191,7 @@ function fetchChannels() {
   channelUrls.forEach(channel => {
     fetch(channel, { headers: { "Client-ID": clientId }})
     .then(response => response.json())
-    .then(data => { data.stream !== null ? channelOnline(data) : channelOffline(data) })
+    .then(data => addChannel(data));
   });
 }
 
@@ -226,8 +209,8 @@ function setLocalStorage() {
 
 // TODO: gold-plating: maybe get game cover pics and organize app by game
 function fetchGameData() {
-  let gameDataUrl = 'https://api-endpoint.igdb.com';
-  fetch(gameDataUrl, { headers: { "user-key": "7af87312b398b3ea1c3f0db3770d5c66" }})
+  let extraGameDataUrl = 'https://api-endpoint.igdb.com';
+  fetch(extraGameDataUrl, { headers: { "user-key": "7af87312b398b3ea1c3f0db3770d5c66" }})
   .then(response => response.json())
   .then(data => console.log(data));
 }
