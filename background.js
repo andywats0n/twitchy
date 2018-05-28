@@ -39,7 +39,6 @@ function showRemoveChannelIcons(e) {
   removeChannelIcons = document.querySelectorAll('.remove-icon');
   removeChannelIcons.forEach(icon => icon.addEventListener('click', removeChannelFromList));
   channelList = document.querySelectorAll('.channel');
-  console.log(channelList);
   canEditChannelList(channelList);
 }
 
@@ -49,10 +48,8 @@ function removeChannelFromList(e) {
   let childArray = Array.from(e.target.parentElement.childNodes);
   let channelName = (childArray[1].firstChild.nextSibling.innerHTML).toLowerCase();
 
-  if(childArray[1].classList.contains('channel') && localChannelList.includes(channelName)) {
-    localChannelList.splice(localChannelList.indexOf(channelName), 1);
-    channelListItem.remove();
-  }
+  localChannelList.splice(localChannelList.indexOf(channelName), 1);
+  channelListItem.remove();
 }
 
 function canEditChannelList(channelList) {
@@ -127,6 +124,7 @@ function hideChannelInput() {
 
 // when 'enter' is pressed, add channel to the list
 function addChannelToList(e) {
+  let localChannelList = [];
   let channelName = addChannelInput.value;
   if(e.keyCode === 13) {
     hideChannelInput();
@@ -144,7 +142,7 @@ function addChannelToList(e) {
 function addChannel(data) {
   channelListItem = document.createElement('li');
   removeChannelIcon = document.createElement('a');
-  channelListItem.classList.add('channel-list-item');
+  channelListItem.classList.add('channel', 'channel-list-item');
   removeChannelIcon.classList.add('remove-icon', 'fa', 'fa-close');
 
   // if stream is not null, add to online list, otherwise add to offline list
@@ -152,7 +150,7 @@ function addChannel(data) {
     if((data.stream.game).toLowerCase() === 'playerunknown\'s battlegrounds') data.stream.game = 'PUBG';
     if((data.stream.game).toLowerCase() === 'world of warcraft') data.stream.game = 'WoW';
     channelListItem.innerHTML = `
-      <a class="channel" href="${data.stream.channel.url}" target="_blank">
+      <a href="${data.stream.channel.url}" target="_blank">
         <strong class="channel-name">${data.stream.channel.display_name}</strong> playing 
         <strong class="channel-game">${data.stream.game}</strong><span class="viewers"> for <span class="viewer-count">${data.stream.viewers}</span> viewers</span>
       </a>`;
@@ -161,7 +159,7 @@ function addChannel(data) {
   } else {
     let channelName = data._links.self.replace(url, '');
     channelListItem.innerHTML = `
-      <div class="channel">
+      <div>
         <strong class="channel-name">${channelName}</strong><span class="offline-text"> is offline</span>
       </div>`;
     offlineList.appendChild(channelListItem);
@@ -171,6 +169,7 @@ function addChannel(data) {
 
 // concat urls with channel names to be fetched
 function updateChannelUrls() {
+  let localChannelList = [];
   localChannelList.forEach(channel => {
     channelUrls.push(url + channel);
   });
