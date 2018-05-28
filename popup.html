@@ -11,24 +11,26 @@
 </head>
 <body>
   <div class="modal-header">
-    <h1 class="logo">
       <a href="https://www.twitch.tv/" target="_blank">
-        <img src="assets/icon.png" alt="Twitch View" class="logo-icon" />
+        <img src="assets/icon.png" alt="Twitch View" class="logo" />
       </a>
-      <span>Quick Twitch </span><span class="version"> v1.0.0</span>
-    </h1>
+      <h1 class="title">Quick Twitch</h1>
+      <p class="version">v1.0.0</p>
   </div>
   <div class="modal-content">
-    <ul class="online">
-      
-    </ul>
+    <ul class="online"></ul>
     <ul class="offline"></ul>
   </div>
-  <div class="footer">
-    <div class="fa fa-plus add-icon"><span class="add-channel-text">Add new channel</span></div>
-    <div class="fa fa-close close-icon"></div>
-    <span class="input-container"></span>
-    <button class="remove-channels-btn">Remove</button>
+  <div class="modal-footer">
+    <div class="input-footer">
+      <div class="fa fa-plus add-icon"></div>
+      <span class="add-channel-text">Add new channel</span>
+      <div class="fa fa-close close-icon"></div>
+      <span class="input-container"></span>
+    </div>
+    <div class="edit-channel-footer">
+      <button class="remove-channels-btn">Remove</button>
+    </div>
   </div>
   <script src="background.js"></script>
 </body>

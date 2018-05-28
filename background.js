@@ -1,8 +1,9 @@
-const closeAddChannelInputIcon = document.querySelector('.close-icon');
-const inputContainer = document.querySelector('.input-container');
 const removeBtn = document.querySelector('.remove-channels-btn');
+const closeAddChannelInputIcon = document.querySelector('.close-icon');
 const addChannelInputIcon = document.querySelector('.add-icon');
+const addChannelInputContainer = document.querySelector('.input-container');
 const addChannelInput = document.createElement('input');
+const addChannelText = document.querySelector('.add-channel-text');
 const offlineList = document.querySelector('.offline');
 const onlineList = document.querySelector('.online');
 
@@ -23,8 +24,9 @@ let channel;
 chrome.storage.local.get("channelList", loadChannels);
 // hide input box 'x' icon on load
 closeAddChannelInputIcon.style.display = 'none';
-// when 'plus' icon is clicked, show input box
+// when 'plus' icon or 'add channel' text is clicked, show input box
 addChannelInputIcon.addEventListener('click', shouldShowInput);
+addChannelText.addEventListener('click', shouldShowInput);
 // on key down, add channel to the list
 addChannelInput.addEventListener('keydown', addChannelToList);
 // when 'x' is clicked, hide input box
@@ -37,6 +39,7 @@ function showRemoveChannelIcons(e) {
   removeChannelIcons = document.querySelectorAll('.remove-icon');
   removeChannelIcons.forEach(icon => icon.addEventListener('click', removeChannelFromList));
   channelList = document.querySelectorAll('.channel');
+  console.log(channelList);
   canEditChannelList(channelList);
 }
 
@@ -52,12 +55,12 @@ function removeChannelFromList(e) {
   }
 }
 
-// when 'remove' is clicked, switch to 'done' and show 'x' icons
-// when 'done' is clicked, switch to 'remove' and hide 'x' icons
 function canEditChannelList(channelList) {
   if(!isEditingChannelList) {
+    // when 'remove' is clicked, switch to 'done' and show 'x' icons
     editChannelList(channelList);
   } else if(isEditingChannelList) {
+    // when 'done' is clicked, switch to 'remove' and hide 'x' icons
     doneEditChannelList(channelList);
   }
 }
@@ -105,22 +108,21 @@ function shouldShowInput() {
 function showChannelInput() {
   shouldShowAddChannelInput = true;
   addChannelInputIcon.style.display = 'none';
+  addChannelText.style.display = 'none';
   closeAddChannelInputIcon.style.display = 'inline-block';
-  inputContainer.appendChild(addChannelInput);
-  inputContainer.style.borderColor = 'purple';
+  addChannelInput.setAttribute('placeholder', 'Press enter to add');
+  addChannelInputContainer.appendChild(addChannelInput);
   addChannelInput.focus();
-  addChannelInput.style.width = '33%'; 
-  addChannelInput.style.fontSize = '14px';
-  addChannelInput.setAttribute('placeholder', 'Search');
 }
 
 // hide add channel input box
 function hideChannelInput() {
   shouldShowAddChannelInput = false;
-  closeAddChannelInputIcon.style.display = 'none';
   addChannelInputIcon.style.display = 'inline-block';
+  addChannelText.style.display = 'inline-block';
+  closeAddChannelInputIcon.style.display = 'none';
+  addChannelInputContainer.removeChild(addChannelInput);
   addChannelInput.value = '';
-  inputContainer.removeChild(addChannelInput);
 }
 
 // when 'enter' is pressed, add channel to the list
@@ -145,24 +147,22 @@ function addChannel(data) {
   channelListItem.classList.add('channel-list-item');
   removeChannelIcon.classList.add('remove-icon', 'fa', 'fa-close');
 
-  console.log('online:', onlineList.childNodes.length);
-  console.log('offline:', offlineList.childNodes.length);
-
   // if stream is not null, add to online list, otherwise add to offline list
-  if(data.stream !== null && onlineList.childNodes.length > 1) {
-    if((data.stream.game).toUpperCase() === 'PLAYERUNKNOWN\'S BATTLEGROUNDS') data.stream.game = 'pubg';
+  if(data.stream !== null) {
+    if((data.stream.game).toLowerCase() === 'playerunknown\'s battlegrounds') data.stream.game = 'PUBG';
+    if((data.stream.game).toLowerCase() === 'world of warcraft') data.stream.game = 'WoW';
     channelListItem.innerHTML = `
-      <a href="${data.stream.channel.url}" target="_blank" class="channel">
-        <strong class="channel channel-name">${data.stream.channel.display_name}</strong> playing 
-        <strong class="channel channel-game">${data.stream.game}</strong>
+      <a class="channel" href="${data.stream.channel.url}" target="_blank">
+        <strong class="channel-name">${data.stream.channel.display_name}</strong> playing 
+        <strong class="channel-game">${data.stream.game}</strong><span class="viewers"> for <span class="viewer-count">${data.stream.viewers}</span> viewers</span>
       </a>`;
     onlineList.appendChild(channelListItem);
     channelListItem.appendChild(removeChannelIcon);
   } else {
     let channelName = data._links.self.replace(url, '');
     channelListItem.innerHTML = `
-      <div class="channel offline-channel">
-        <strong class="channel-name">${channelName}</strong> is offline
+      <div class="channel">
+        <strong class="channel-name">${channelName}</strong><span class="offline-text"> is offline</span>
       </div>`;
     offlineList.appendChild(channelListItem);
     channelListItem.appendChild(removeChannelIcon);
