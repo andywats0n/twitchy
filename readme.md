@@ -10,4 +10,4 @@ These instructions will get you a copy of the project up and running on your loc
 3. Enable Developer Mode by clicking the toggle switch next to Developer mode.
 4. Click the LOAD UNPACKED button and select the extension directory.
 ```
-### Ta-da! The extension has been successfully installed.
+### Ta-da! The extension has been successfully installed. It should now be available in extensions toolbar of your browser.
