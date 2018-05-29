@@ -124,7 +124,6 @@ function hideChannelInput() {
 
 // when 'enter' is pressed, add channel to the list
 function addChannelToList(e) {
-  let localChannelList = [];
   let channelName = addChannelInput.value;
   if(e.keyCode === 13) {
     hideChannelInput();
@@ -168,9 +167,8 @@ function addChannel(data) {
 }
 
 // concat urls with channel names to be fetched
-function updateChannelUrls() {
-  let localChannelList = [];
-  localChannelList.forEach(channel => {
+function updateChannelUrls(localChannelList) {
+  return localChannelList.forEach(channel => {
     channelUrls.push(url + channel);
   });
 }
@@ -197,7 +195,7 @@ function fetchChannels() {
 // update url's and fetch data from twitch
 function loadChannels(result) {
   localChannelList = result.channelList;
-  updateChannelUrls();
+  updateChannelUrls(localChannelList);
   fetchChannels();
 }
 
