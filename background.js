@@ -128,8 +128,13 @@ function addChannelToList(e) {
   if(e.keyCode === 13) {
     hideChannelInput();
     // TODO: give user feedback if channel is already in the list
-    if(!localChannelList.includes(channelName)) {
+    if(localChannelList && !localChannelList.includes(channelName)) {
       localChannelList.push(channelName.toLowerCase());
+      fetchNewChannel(channelName);
+      setLocalStorage();
+    } else {
+      localChannelList = [];
+      localChannelList.push(channelName);
       fetchNewChannel(channelName);
       setLocalStorage();
     }
@@ -168,9 +173,11 @@ function addChannel(data) {
 
 // concat urls with channel names to be fetched
 function updateChannelUrls(localChannelList) {
-  return localChannelList.forEach(channel => {
-    channelUrls.push(url + channel);
-  });
+  if(localChannelList) {
+    return localChannelList.forEach(channel => {
+      channelUrls.push(url + channel);
+    });
+  }
 }
 
 // fetch single channel and determine if online or offline
