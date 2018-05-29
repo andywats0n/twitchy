@@ -45,9 +45,13 @@ input {
   align-items: center;
   justify-content: space-between;
   padding: 0 5% 0 5%;
+  height: 60px;
 }
-.logo {
+.icon {
   width: 30px;
+}
+.logo{
+  height: 45px;
 }
 
 /* main-content */
@@ -81,7 +85,7 @@ input {
 /* footer */
 .modal-footer {
   display: flex;
-  height: 60.156px;
+  height: 60px;
   padding: 0 5% 0 5%;
   background-color: var(--twitch-purple);
   color: white;
@@ -108,4 +112,7 @@ input {
   font-size: 14px;
   font-weight: 600;
   border: 2px solid #6441a4;
+}
+.add-channel-text {
+  padding-left: 5px;
 }
