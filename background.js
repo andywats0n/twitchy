@@ -162,9 +162,9 @@ function addChannel(data) {
   } else {
     let channelName = data._links.self.replace(url, '');
     channelListItem.innerHTML = `
-      <div>
+      <a href="https://twitch.tv/${channelName}" target="_blank">
         <strong class="channel-name">${channelName}</strong><span class="offline-text"> is offline</span>
-      </div>`;
+      </a>`;
     offlineList.appendChild(channelListItem);
     channelListItem.appendChild(removeChannelIcon);
   }
