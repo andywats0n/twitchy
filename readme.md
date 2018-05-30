@@ -1,5 +1,7 @@
 # Twitchy
 
+Due to issues with publishing on the Chrome Web Store, the extension is currently available for download. Follow the istructions below to get it up and running on your local machine.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
