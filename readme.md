@@ -13,3 +13,12 @@ These instructions will get you a copy of the project up and running on your loc
 4. Click the LOAD UNPACKED button and select the extension directory.
 ```
 ### Ta-da! The extension has been successfully installed. It should now be available in the extensions toolbar of your browser.
+
+Here is a short list of channels you can try for testing if you aren't familiar with twitch.tv:
+```
+  shroud
+  drdisrespectlive
+  ninja
+  squishymuffinz
+  towelliee
+```
