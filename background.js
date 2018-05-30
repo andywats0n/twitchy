@@ -18,7 +18,6 @@ let channelUrls = [];
 let removeChannelIcons;
 let channelListItem;
 let channelList;
-let channel;
 
 // load channels from local storage
 chrome.storage.local.get("channelList", loadChannels);
