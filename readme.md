@@ -1,6 +1,6 @@
 # Twitchy
 
-Due to issues with publishing on the Chrome Web Store, the extension is currently available for download. Follow the istructions below to get it up and running on your local machine.
+Due to issues with publishing on the Chrome Web Store, the extension is currently unavailable for download. Follow the istructions below to get it up and running on your local machine.
 
 ## Getting Started
 
