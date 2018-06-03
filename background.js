@@ -150,13 +150,20 @@ function addChannel(data) {
 
   // if stream is not null, add to online list, otherwise add to offline list
   if(data.stream !== null) {
+
+    // renaming games for readability
     if((data.stream.game).toLowerCase() === 'playerunknown\'s battlegrounds') data.stream.game = 'PUBG';
     if((data.stream.game).toLowerCase() === 'world of warcraft') data.stream.game = 'WoW';
+    if((data.stream.game).toLowerCase() === 'counter-strike: global offensive') data.stream.game = 'CS:GO';
+
     channelListItem.innerHTML = `
-      <a href="${data.stream.channel.url}" target="_blank">
-        <strong class="channel-name">${data.stream.channel.display_name}</strong> playing 
-        <strong class="channel-game">${data.stream.game}</strong><span class="viewers"> for <span class="viewer-count">${data.stream.viewers}</span> viewers</span>
-      </a>`;
+      <span>
+        <img src="${data.stream.channel.logo}" class="channel-logo" />
+        <a href="${data.stream.channel.url}" target="_blank">
+          <strong class="channel-name">${data.stream.channel.display_name}</strong> playing 
+          <strong class="channel-game">${data.stream.game}</strong><span class="viewers"> for <span class="viewer-count">${data.stream.viewers}</span> viewers</span>
+        </a>
+      </span>`;
     onlineList.appendChild(channelListItem);
     channelListItem.appendChild(removeChannelIcon);
   } else {
@@ -172,11 +179,7 @@ function addChannel(data) {
 
 // concat urls with channel names to be fetched
 function updateChannelUrls(localChannelList) {
-  if(localChannelList) {
-    return localChannelList.forEach(channel => {
-      channelUrls.push(url + channel);
-    });
-  }
+  if(localChannelList) return localChannelList.forEach(channel => channelUrls.push(url + channel));
 }
 
 // fetch single channel and determine if online or offline

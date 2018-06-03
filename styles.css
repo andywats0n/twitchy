@@ -55,6 +55,9 @@ input {
 }
 
 /* main-content */
+.channel-logo {
+  width: 12px;
+}
 .modal-content {
   display: flex;
   flex-direction: column;
